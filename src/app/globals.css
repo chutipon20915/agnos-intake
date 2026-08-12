@@ -64,6 +64,7 @@ html.dark {
 body {
   background-color: var(--canvas);
   color: var(--ink);
+  overflow-x: hidden; /* safety net: the page must never scroll sideways */
 }
 
 ::selection {

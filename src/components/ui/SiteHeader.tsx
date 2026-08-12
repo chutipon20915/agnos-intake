@@ -11,11 +11,11 @@ import { cn } from "@/lib/utils";
 export function SiteHeader({ right }: { right?: ReactNode }) {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-canvas/80 backdrop-blur">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <Logo />
-        <div className="flex items-center gap-2">
+      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-2 px-4 sm:gap-4 sm:px-6">
+        <Logo className="min-w-0 flex-1 sm:flex-none" />
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           {right}
-          <nav className="flex items-center gap-1">
+          <nav className="flex items-center gap-0.5 sm:gap-1">
             <HeaderLink href="/patient">Patient</HeaderLink>
             <HeaderLink href="/staff">Staff</HeaderLink>
           </nav>
@@ -36,7 +36,7 @@ function HeaderLink({ href, children }: { href: string; children: ReactNode }) {
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+        "rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors sm:px-3",
         active
           ? "bg-brand-500/12 text-brand-700 ring-1 ring-inset ring-brand-500/25 dark:bg-brand-500/15 dark:text-brand-200"
           : "text-muted hover:bg-brand-500/10 hover:text-brand-700 dark:hover:text-brand-200",

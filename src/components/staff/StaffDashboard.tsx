@@ -66,7 +66,7 @@ export function StaffDashboard() {
       )}
 
       {/* Stat tiles */}
-      <div className="mt-6 grid grid-cols-3 gap-3">
+      <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
         <StatTile label="Total" value={counts.total} tone="ink" />
         <StatTile label="Live now" value={counts.live} tone="emerald" />
         <StatTile label="Submitted" value={counts.submitted} tone="brand" />
@@ -132,9 +132,11 @@ function StatTile({
     brand: "text-brand-600 dark:text-brand-300",
   }[tone];
   return (
-    <div className="rounded-xl border border-border bg-surface p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted">{label}</p>
-      <p className={cn("mt-1 text-3xl font-bold tabular-nums", toneClass)}>{value}</p>
+    <div className="rounded-xl border border-border bg-surface p-3 sm:p-4">
+      <p className="truncate text-[11px] font-medium uppercase tracking-wide text-muted sm:text-xs">
+        {label}
+      </p>
+      <p className={cn("mt-1 text-2xl font-bold tabular-nums sm:text-3xl", toneClass)}>{value}</p>
     </div>
   );
 }
