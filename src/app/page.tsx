@@ -57,10 +57,6 @@ export default function Home() {
           </div>
         </section>
       </main>
-
-      <footer className="border-t border-border py-6 text-center text-xs text-muted">
-        Built for the Agnos front-end assignment · Next.js · Supabase Realtime · TailwindCSS
-      </footer>
     </div>
   );
 }
