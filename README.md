@@ -4,9 +4,10 @@ A responsive **patient intake form** synchronized in **real time** with a **staf
 
 Built for the Agnos front-end assignment.
 
-- **Live demo:** _<add your Vercel URL here>_
-- **Patient form:** `/patient`
-- **Staff dashboard:** `/staff`
+- **Live demo:** <https://agnos-intake.vercel.app>
+- **Patient form:** <https://agnos-intake.vercel.app/patient>
+- **Staff dashboard:** <https://agnos-intake.vercel.app/staff>
+- **Repository:** <https://github.com/chutipon20915/agnos-intake>
 
 ---
 
