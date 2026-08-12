@@ -110,8 +110,11 @@ export function PatientForm() {
       <div className="space-y-5">
         {FORM_SECTIONS.map((section) => (
           <fieldset key={section.id} className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
-            <legend className="px-1 text-base font-semibold text-ink">{section.title}</legend>
-            <p className="mb-4 text-sm text-muted">{section.description}</p>
+            <legend className="sr-only">{section.title}</legend>
+            <h2 className="text-base font-semibold text-ink" aria-hidden>
+              {section.title}
+            </h2>
+            <p className="mt-1 mb-4 text-sm text-muted">{section.description}</p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {section.fields.map((field) => (
                 <FormField
