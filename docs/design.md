@@ -4,8 +4,8 @@
 
 A calm, clinical aesthetic appropriate for a healthcare product:
 
-- **Brand colour:** a medical **teal** (`--color-brand-*`) used for primary
-  actions and accents — trustworthy without feeling corporate-blue.
+- **Brand colour:** Agnos **royal blue** (`--color-brand-*`) used for primary
+  actions and accents, matching the Agnos Health brand.
 - **Neutrals:** slate-based surfaces with semantic tokens (`canvas`, `surface`,
   `surface-2`, `border`, `ink`, `muted`) that flip between light and dark.
 - **Type:** Geist (via `next/font`) for a clean, legible UI at small sizes.
@@ -26,7 +26,7 @@ consistently everywhere (badge, avatar, card accent):
 | Typing… | amber (pulsing) | field focused + activity in the last 6s |
 | Active | emerald | activity in the last 25s |
 | Idle | slate | no activity for 25s+ ("inactive") |
-| Submitted | teal | form submitted |
+| Submitted | blue | form submitted |
 | Offline | grey | presence lost (detail view) |
 
 ## Responsiveness
