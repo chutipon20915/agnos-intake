@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,9 +16,11 @@ import { cn } from "@/lib/utils";
 const REQUIRED_KEYS = ALL_FIELDS.filter((f) => f.required).map((f) => f.key);
 
 export function PatientForm() {
-  const { connection, updateField, focusField, blurField, submit, resetSession } = useSessionSync();
+  const { connection, initialData, updateField, focusField, blurField, submit, resetSession } =
+    useSessionSync();
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const prefilledRef = useRef(false);
 
   const {
     register,
@@ -31,6 +33,14 @@ export function PatientForm() {
     defaultValues: EMPTY_FORM as PatientFormData,
     mode: "onBlur",
   });
+
+  // Pre-fill the form once when resuming an existing session (?sid=…).
+  useEffect(() => {
+    if (initialData && !prefilledRef.current && Object.keys(initialData).length > 0) {
+      prefilledRef.current = true;
+      reset({ ...EMPTY_FORM, ...initialData } as PatientFormData);
+    }
+  }, [initialData, reset]);
 
   const values = watch();
   const filledRequired = useMemo(

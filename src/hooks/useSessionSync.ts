@@ -20,6 +20,8 @@ const DB_DEBOUNCE_MS = 450;
 export function useSessionSync() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [connection, setConnection] = useState<ConnectionState>("connecting");
+  // Values loaded from an existing session (for resume) so the form can pre-fill.
+  const [initialData, setInitialData] = useState<Partial<PatientFormData> | null>(null);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const presenceRef = useRef<RealtimeChannel | null>(null);
@@ -77,6 +79,8 @@ export function useSessionSync() {
       }
       idRef.current = id;
       setSessionId(id);
+      // Hand the loaded values to the form so a resumed session shows prior input.
+      setInitialData({ ...dataRef.current });
 
       // Keep the session id in the URL so a refresh (or a shared link) resumes it.
       const u = new URL(window.location.href);
@@ -212,5 +216,5 @@ export function useSessionSync() {
     window.history.replaceState(null, "", u.toString());
   }, []);
 
-  return { sessionId, connection, updateField, focusField, blurField, submit, resetSession };
+  return { sessionId, connection, initialData, updateField, focusField, blurField, submit, resetSession };
 }
