@@ -8,8 +8,16 @@ import { cn, countFilled, displayName, initials, timeAgo } from "@/lib/utils";
 
 const REQUIRED_KEYS = ALL_FIELDS.filter((f) => f.required).map((f) => f.key);
 
-export function SessionCard({ row, now }: { row: PatientSessionRow; now: number }) {
-  const status = deriveStatus(row, { now });
+export function SessionCard({
+  row,
+  online,
+  now,
+}: {
+  row: PatientSessionRow;
+  online?: boolean;
+  now: number;
+}) {
+  const status = deriveStatus(row, { online, now });
   const data = row.form_data ?? {};
   const name = displayName(data);
   const filled = countFilled(data, REQUIRED_KEYS);
@@ -20,19 +28,27 @@ export function SessionCard({ row, now }: { row: PatientSessionRow; now: number 
       href={`/staff/${row.id}`}
       className="group flex items-center gap-4 rounded-xl border border-border bg-surface p-4 transition-all hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-md"
     >
-      <span
-        className={cn(
-          "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white",
-          status === "submitted"
-            ? "bg-brand-600"
-            : status === "typing"
-              ? "bg-amber-500"
-              : status === "active"
-                ? "bg-emerald-500"
-                : "bg-slate-400",
+      <span className="relative shrink-0">
+        <span
+          className={cn(
+            "flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-white",
+            status === "submitted"
+              ? "bg-brand-600"
+              : status === "typing"
+                ? "bg-amber-500"
+                : status === "active"
+                  ? "bg-emerald-500"
+                  : "bg-slate-400",
+          )}
+        >
+          {initials(data)}
+        </span>
+        {online && (
+          <span
+            className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-surface bg-emerald-500"
+            title="Online — form open now"
+          />
         )}
-      >
-        {initials(data)}
       </span>
 
       <div className="min-w-0 flex-1">

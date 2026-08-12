@@ -12,15 +12,23 @@ function sortByActive(rows: PatientSessionRow[]): PatientSessionRow[] {
   );
 }
 
+interface PatientPresence {
+  id?: string;
+}
+
 /**
- * Staff dashboard feed: loads every session, then keeps the list live via
- * Postgres change-streams (INSERT / UPDATE / DELETE) on `patient_sessions`.
+ * Staff dashboard feed. Two live sources:
+ *  - Postgres change-streams (INSERT / UPDATE / DELETE) keep the row data live.
+ *  - A shared Presence channel (`presence:patients`) tells us which patients have
+ *    the form open *right now*, so "online" doesn't depend on typing activity.
  */
 export function useSessionsRealtime() {
   const [rows, setRows] = useState<PatientSessionRow[]>([]);
+  const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set());
   const [connection, setConnection] = useState<ConnectionState>("connecting");
   const [loading, setLoading] = useState(true);
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const presenceRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
     const supabase = getSupabase();
@@ -65,15 +73,31 @@ export function useSessionsRealtime() {
           else if (status === "CLOSED") setConnection("reconnecting");
         });
       channelRef.current = channel;
+
+      // Track which patients currently have the form open.
+      const presence = supabase.channel("presence:patients");
+      presence
+        .on("presence", { event: "sync" }, () => {
+          const state = presence.presenceState<PatientPresence>();
+          const ids = new Set<string>();
+          for (const entries of Object.values(state)) {
+            for (const meta of entries) if (meta.id) ids.add(meta.id);
+          }
+          setOnlineIds(ids);
+        })
+        .subscribe();
+      presenceRef.current = presence;
     })();
 
     return () => {
       cancelled = true;
       const supa = getSupabase();
       if (supa && channelRef.current) supa.removeChannel(channelRef.current);
+      if (supa && presenceRef.current) supa.removeChannel(presenceRef.current);
       channelRef.current = null;
+      presenceRef.current = null;
     };
   }, []);
 
-  return { rows, connection, loading };
+  return { rows, onlineIds, connection, loading };
 }

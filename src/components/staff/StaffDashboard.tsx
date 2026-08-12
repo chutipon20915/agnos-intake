@@ -16,14 +16,18 @@ import { cn } from "@/lib/utils";
 type Filter = "all" | "live" | "submitted";
 
 export function StaffDashboard() {
-  const { rows, connection, loading } = useSessionsRealtime();
+  const { rows, onlineIds, connection, loading } = useSessionsRealtime();
   const now = useNow(1000);
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
 
   const decorated = useMemo(
-    () => rows.map((row) => ({ row, status: deriveStatus(row, { now }) })),
-    [rows, now],
+    () =>
+      rows.map((row) => {
+        const online = onlineIds.has(row.id) || undefined;
+        return { row, online, status: deriveStatus(row, { online, now }) };
+      }),
+    [rows, onlineIds, now],
   );
 
   const counts = useMemo(() => {
@@ -107,8 +111,8 @@ export function StaffDashboard() {
           <EmptyState hasAny={rows.length > 0} />
         ) : (
           <div className="grid gap-3">
-            {visible.map(({ row }) => (
-              <SessionCard key={row.id} row={row} now={now} />
+            {visible.map(({ row, online }) => (
+              <SessionCard key={row.id} row={row} online={online} now={now} />
             ))}
           </div>
         )}

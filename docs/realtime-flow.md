@@ -22,6 +22,15 @@ top**, so it is *immediate* while typing and *correct* after any reconnect.
   The staff detail view subscribes to the same channel.
 - **`staff:sessions`** — a single channel carrying Postgres `*` changes on
   `patient_sessions`, powering the dashboard list.
+- **`presence:patients`** — a global presence channel every patient joins while
+  their form is open. The dashboard reads its presence state to know who is
+  **online right now** (tab open), so "Active/online" doesn't depend on typing.
+
+## Resuming a session
+
+The active session id is kept in the patient URL as `?sid=…` (not tab-local
+storage). A refresh, a bookmarked link, or a link copied by staff ("Copy patient
+link") all resume the **same** session and its saved values — on any device.
 
 ## Patient → Staff sequence
 

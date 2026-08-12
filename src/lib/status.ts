@@ -29,13 +29,17 @@ export function deriveStatus(
 
   if (row.status === "submitted" || row.submitted_at) return "submitted";
 
-  // Explicit presence (detail view) wins for offline detection.
-  if (opts.online === false) return "offline";
-
   const sinceActive = now - new Date(row.last_active_at).getTime();
   const focused = opts.focusedField ?? row.current_field;
+  const recentTyping = Boolean(focused) && sinceActive < TYPING_WINDOW_MS;
 
-  if (focused && sinceActive < TYPING_WINDOW_MS) return "typing";
+  // When we know presence: an open tab counts as live regardless of idle time,
+  // and a closed tab (online === false) is explicitly offline.
+  if (opts.online === true) return recentTyping ? "typing" : "active";
+  if (opts.online === false) return "offline";
+
+  // Presence unknown → fall back to recency.
+  if (recentTyping) return "typing";
   if (sinceActive < ACTIVE_WINDOW_MS) return "active";
   return "idle";
 }

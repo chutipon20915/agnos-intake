@@ -25,6 +25,8 @@ Built for the Agnos front-end assignment.
 
 - **Field-level typing indicator** — the staff view highlights the exact field the patient is editing right now and flashes fields as they change.
 - **Multi-patient dashboard** — staff see a live list of every session with search + filter (All / Live / Submitted) and summary stat tiles.
+- **Live presence on the dashboard** — patients who have the form open show as **online** (green dot / "Active") in real time, independent of typing; "Live now" counts who is actually present.
+- **Resumable sessions** — every session has a shareable `/patient?sid=…` link, so a patient can return later (even on another device) and keep editing; staff can copy that link from the detail view.
 - **Two-layer sync** — instant per-keystroke Broadcast layered over durable Postgres writes, so the view is both instant *and* correct after a reconnect/refresh.
 - **Presence detection** — the detail view knows whether the patient is still connected.
 - **Light / dark mode** — with no flash of the wrong theme on load.

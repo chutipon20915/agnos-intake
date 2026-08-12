@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Circle } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Check, Circle, Link2 } from "lucide-react";
 import { useSessionDetail } from "@/hooks/useSessionDetail";
 import { useNow } from "@/hooks/useNow";
 import { FORM_SECTIONS, ALL_FIELDS } from "@/lib/fields";
@@ -38,9 +39,12 @@ export function SessionDetailView({ id }: { id: string }) {
 
   return (
     <div>
-      <Link href="/staff" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink">
-        <ArrowLeft className="h-4 w-4" /> Dashboard
-      </Link>
+      <div className="flex items-center justify-between gap-3">
+        <Link href="/staff" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink">
+          <ArrowLeft className="h-4 w-4" /> Dashboard
+        </Link>
+        <CopyPatientLink id={id} />
+      </div>
 
       {/* Patient header */}
       <div className="mt-4 rounded-2xl border border-border bg-surface p-5 sm:p-6">
@@ -111,6 +115,30 @@ function Meta({ label, value }: { label: string; value: string }) {
       <p className="text-xs font-medium uppercase tracking-wide text-muted">{label}</p>
       <p className="mt-0.5 text-sm font-semibold text-ink">{value}</p>
     </div>
+  );
+}
+
+/** Copies a resumable patient link (/patient?sid=…) so the patient can continue later. */
+function CopyPatientLink({ id }: { id: string }) {
+  const [copied, setCopied] = useState(false);
+  function copy() {
+    const url = `${window.location.origin}/patient?sid=${id}`;
+    try {
+      void navigator.clipboard?.writeText(url);
+    } catch {
+      /* clipboard may be blocked; the link is still valid */
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  }
+  return (
+    <button
+      onClick={copy}
+      className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:border-brand-400 hover:text-ink"
+    >
+      {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Link2 className="h-3.5 w-3.5" />}
+      {copied ? "Copied!" : "Copy patient link"}
+    </button>
   );
 }
 

@@ -6,7 +6,6 @@ import { getSupabase } from "@/lib/supabase/client";
 import type { ConnectionState } from "@/components/ui/ConnectionIndicator";
 import type { PatientFormData, PatientFormField } from "@/lib/types";
 
-const STORAGE_KEY = "agnos_session_id";
 const DB_DEBOUNCE_MS = 450;
 
 /**
@@ -23,6 +22,7 @@ export function useSessionSync() {
   const [connection, setConnection] = useState<ConnectionState>("connecting");
 
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const presenceRef = useRef<RealtimeChannel | null>(null);
   const idRef = useRef<string | null>(null);
   // Accumulates the latest value of every field for the debounced DB write.
   const dataRef = useRef<Partial<PatientFormData>>({});
@@ -38,8 +38,10 @@ export function useSessionSync() {
     let cancelled = false;
 
     (async () => {
-      // Reuse an existing session for this tab if the row still exists.
-      let id = sessionStorage.getItem(STORAGE_KEY);
+      // Resume the session named in the URL (?sid=) if it still exists. This lets
+      // a patient come back later — even on another device/link — and keep editing.
+      const params = new URLSearchParams(window.location.search);
+      let id = params.get("sid");
       if (id) {
         const { data } = await supabase
           .from("patient_sessions")
@@ -50,7 +52,7 @@ export function useSessionSync() {
           dataRef.current = data.form_data ?? {};
           submittedRef.current = Boolean(data.submitted_at);
         } else {
-          id = null;
+          id = null; // stale link → start fresh
         }
       }
 
@@ -66,7 +68,6 @@ export function useSessionSync() {
           return;
         }
         id = data.id as string;
-        sessionStorage.setItem(STORAGE_KEY, id);
       }
 
       if (cancelled) return;
@@ -77,7 +78,14 @@ export function useSessionSync() {
       idRef.current = id;
       setSessionId(id);
 
-      // Live channel: presence marks the patient "online", broadcast carries keystrokes.
+      // Keep the session id in the URL so a refresh (or a shared link) resumes it.
+      const u = new URL(window.location.href);
+      if (u.searchParams.get("sid") !== id) {
+        u.searchParams.set("sid", id);
+        window.history.replaceState(null, "", u.toString());
+      }
+
+      // Per-session channel: presence marks the patient "online", broadcast carries keystrokes.
       const channel = supabase.channel(`session:${id}`, {
         config: { presence: { key: id }, broadcast: { self: false } },
       });
@@ -94,6 +102,18 @@ export function useSessionSync() {
           }
         });
       channelRef.current = channel;
+
+      // Global presence channel: lets the staff dashboard know which patients are
+      // online *right now* (tab open), independent of typing activity.
+      const presence = supabase.channel("presence:patients", {
+        config: { presence: { key: id } },
+      });
+      presence.subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          presence.track({ id, online_at: new Date().toISOString() });
+        }
+      });
+      presenceRef.current = presence;
     })();
 
     return () => {
@@ -101,7 +121,9 @@ export function useSessionSync() {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       const supa = getSupabase();
       if (supa && channelRef.current) supa.removeChannel(channelRef.current);
+      if (supa && presenceRef.current) supa.removeChannel(presenceRef.current);
       channelRef.current = null;
+      presenceRef.current = null;
     };
   }, []);
 
@@ -185,7 +207,9 @@ export function useSessionSync() {
 
   /** Abandon this session and start a brand new one (used by "New patient"). */
   const resetSession = useCallback(() => {
-    sessionStorage.removeItem(STORAGE_KEY);
+    const u = new URL(window.location.href);
+    u.searchParams.delete("sid");
+    window.history.replaceState(null, "", u.toString());
   }, []);
 
   return { sessionId, connection, updateField, focusField, blurField, submit, resetSession };
